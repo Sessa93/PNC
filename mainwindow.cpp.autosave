@@ -1,0 +1,112 @@
+#include <QtGui>
+
+#include "graphwidget.h"
+#include "mainwindow.h"
+
+MainWindow::MainWindow()
+{
+    tabber = new QTabWidget;
+    tabber->addTab(new GraphWidget(0),"PNC");
+    setCentralWidget(tabber);
+    tabber->setTabsClosable(true);
+    createActions();
+    createMenus();
+    createToolBars();
+    //createStatusBar();
+
+    connect(tabber, SIGNAL(tabCloseRequested(int)), this, SLOT(tabClose(int)));
+    connect(tabber, SIGNAL(currentChanged(int)), this, tabChanged(int));
+}
+
+void MainWindow::createActions()
+{
+    newAct = new QAction(QIcon(":/images/new.png"), tr("&New"), this);
+    newAct->setShortcuts(QKeySequence::New);
+    newAct->setToolTip("Create new Petri's Net");
+    connect(newAct, SIGNAL(triggered()), this, SLOT(newFile()));
+
+    connAct = new QAction(QIcon(":/images/linepointer.png"),tr("&Con"),this);
+    connAct->setToolTip("Connection Mode");
+    connAct->setCheckable(true);
+    connAct->setChecked(true);
+    connect(connAct,SIGNAL(toggled(bool)), this, SLOT(connectionModeClicked(bool)));
+
+    placeAct = new QAction(QIcon(":/images/circle.png"), tr("&Pla"), this);
+    placeAct->setToolTip("Place a new place");
+    placeAct->setCheckable(true);
+    connect(placeAct, SIGNAL(toggled(bool)), this, SLOT(placeModeClicked()));
+
+    transAct = new QAction(QIcon(":/images/trans.png"), tr("&Tra"), this);
+    transAct->setToolTip("Place a new transition");
+    transAct->setCheckable(true);
+    connect(transAct, SIGNAL(toggled(bool)), this, SLOT(transModeClicked()));
+}
+
+void MainWindow::createMenus()
+{
+    fileMenu = menuBar()->addMenu(tr("&File"));
+    fileMenu->addAction(newAct);
+    fileMenu->addSeparator();
+    //fileMenu->addAction(exitAct);
+
+    editMenu = menuBar()->addMenu(tr("&Edit"));
+
+    menuBar()->addSeparator();
+
+    helpMenu = menuBar()->addMenu(tr("&Help"));
+    //helpMenu->addAction(aboutAct);
+}
+
+void MainWindow::createToolBars()
+{
+    group = new QActionGroup(this);
+    group->addAction(connAct);
+    group->addAction(placeAct);
+    group->addAction(transAct);
+    group->setExclusive(true);
+    fileToolBar = addToolBar(tr("File"));
+    fileToolBar->addAction(newAct);
+    fileToolBar->addAction(connAct);
+    fileToolBar->addAction(placeAct);
+    fileToolBar->addAction(transAct);
+}
+
+void MainWindow::newFile()
+{
+    GraphWidget *newSheet = new GraphWidget(this);
+    sheetList.append(newSheet);
+    newSheet->name = "untitled";
+    QString n;
+    n.setNum(sheetList.length());
+    newSheet->name.append(n);
+    tabber->addTab(newSheet,QIcon(":/images/tabIcon1.png"),newSheet->name);
+}
+
+void MainWindow::connectionModeClicked(bool state)
+{
+    int index = tabber->currentIndex();
+    GraphWidget *w = qobject_cast<GraphWidget*>(tabber->widget(index));
+    if(state)
+        w->connectionMode = true;
+}
+
+void MainWindow::placeModeClicked()
+{
+
+}
+
+void MainWindow::transModeClicked()
+{
+
+}
+
+void MainWindow::tabClose(int tab)
+{
+    tabber->removeTab(tab);
+    //TODO: CHIDERE SALVATAGGIO
+}
+
+void MainWindow::tabChanged(int tab)
+{
+    
+}
